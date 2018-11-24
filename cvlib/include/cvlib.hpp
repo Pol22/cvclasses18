@@ -22,7 +22,7 @@ cv::Mat only_split(const cv::Mat& image, double stddev);
 /// \param roi, in - region with sample texture on passed image
 /// \param eps, in - threshold parameter for texture's descriptor distance
 /// \return binary mask with selected texture
-cv::Mat select_texture(const cv::Mat& image, const cv::Rect& roi, double eps);
+cv::Mat select_texture(const cv::Mat& image, const cv::Rect& roi, double eps, void* data);
 
 /// \brief Motion Segmentation algorithm
 class motion_segmentation : public cv::BackgroundSubtractor
