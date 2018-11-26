@@ -79,7 +79,7 @@ private:
 /// \brief FAST corner detection algorithm
 class corner_detector_fast : public cv::Feature2D
 {
-    public:
+public:
     /// \brief Fabrique method for creating FAST detector
     static cv::Ptr<corner_detector_fast> create();
 
@@ -98,6 +98,13 @@ class corner_detector_fast : public cv::Feature2D
     {
         return "FAST_Binary";
     }
+private:
+    int getShift(const int& index, const int& width);
+    char checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour);
+    bool highSpeedTest(const uchar* pixel, const int& width);
+
+		static const int number_of_circle_pixels = 16;
+		uchar threshold = 20;
 };
 } // namespace cvlib
 

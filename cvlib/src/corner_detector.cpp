@@ -16,10 +16,71 @@ cv::Ptr<corner_detector_fast> corner_detector_fast::create()
     return cv::makePtr<corner_detector_fast>();
 }
 
-void corner_detector_fast::detect(cv::InputArray image, CV_OUT std::vector<cv::KeyPoint>& keypoints, cv::InputArray /*mask = cv::noArray()*/)
+int corner_detector_fast::getShift(const int& index, const int& width)
+{
+    switch (index)
+    {
+        case 0: return -3 * width;
+        case 1: return -3 * width + 1;
+        case 2: return -2 * width + 2;
+        case 3: return -width + 3;
+        case 4: return 3;
+        case 5: return width + 3;
+        case 6: return 2 * width + 2;
+        case 7: return 3 * width + 1;
+        case 8: return 3 * width;
+        case 9: return 3 * width - 1;
+        case 10: return 2 * width - 2;
+        case 11: return width - 3;
+        case 12: return -3;
+        case 13: return -width - 3;
+        case 14: return -2 * width - 2;
+        case 15: return -3 * width - 1;
+        defaut: return -1;
+    }
+}
+
+char corner_detector_fast::checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour)
+{
+    if (*neighbour <= *pixel - threshold)
+        return -1;
+    else if (*pixel + threshold <= *neighbour)
+        return 1;
+    else
+        return 0;
+}
+
+bool corner_detector_fast::highSpeedTest(const uchar* pixel, const int& width)
+{
+    int shift_top = getShift(0);
+    int shift_bottom = getShift(8);
+    char check1 = checkDarkerOrBrighter(pixel, pixel[shift_top]) + checkDarkerOrBrighter(pixel, pixel[shift_bottom]);
+    if (check1 == 1 || check1 == -1)
+        return false;
+    int shift_right = getShift(4);
+    int shift_left = getShift(12);
+    // check second
+    if(checkDarkerOrBrighter(pixel, pixel[shift_right]) && )
+}
+
+void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::KeyPoint>& keypoints, cv::InputArray /*mask = cv::noArray()*/)
 {
     keypoints.clear();
-    // \todo implement FAST with minimal LOCs(lines of code), but keep code readable.
+    cv::Mat image = input.getMat();
+    int height = image.size().height;
+    int width = image.size().width;
+
+    uchar* img  = image.data;
+
+    long shift = 0;
+    for(long j = 3; j < height - 3; j++)
+    {
+        for(long i = 3; i < width - 3; i++)
+        {
+            shift = j * width + i;
+            img[shift]
+        }
+    }
 }
 
 void corner_detector_fast::compute(cv::InputArray, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors)
