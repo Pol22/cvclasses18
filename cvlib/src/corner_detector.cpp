@@ -16,7 +16,7 @@ cv::Ptr<corner_detector_fast> corner_detector_fast::create()
     return cv::makePtr<corner_detector_fast>();
 }
 
-int corner_detector_fast::getShift(const int& index, const int& width)
+int corner_detector_fast::getShift(const int& index) const
 {
     switch (index)
     {
@@ -36,11 +36,11 @@ int corner_detector_fast::getShift(const int& index, const int& width)
         case 13: return -width - 3;
         case 14: return -2 * width - 2;
         case 15: return -3 * width - 1;
-        defaut: return -1;
+        defaut: return 0;
     }
 }
 
-char corner_detector_fast::checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour)
+char corner_detector_fast::checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour) const
 {
     if (*neighbour <= *pixel - threshold)
         return -1;
@@ -50,35 +50,63 @@ char corner_detector_fast::checkDarkerOrBrighter(const uchar* pixel, const uchar
         return 0;
 }
 
-bool corner_detector_fast::highSpeedTest(const uchar* pixel, const int& width)
+bool corner_detector_fast::highSpeedTest(const uchar* pixel) const
 {
-    int shift_top = getShift(0);
-    int shift_bottom = getShift(8);
-    char check1 = checkDarkerOrBrighter(pixel, pixel[shift_top]) + checkDarkerOrBrighter(pixel, pixel[shift_bottom]);
-    if (check1 == 1 || check1 == -1)
+	char check1 = checkDarkerOrBrighter(pixel, &pixel[getShift(0)]);
+	char check2 = checkDarkerOrBrighter(pixel, &pixel[getShift(8)]);
+    if (check1 == 0 && check2 == 0)
         return false;
-    int shift_right = getShift(4);
-    int shift_left = getShift(12);
-    // check second
-    if(checkDarkerOrBrighter(pixel, pixel[shift_right]) && )
+
+	char check3 = checkDarkerOrBrighter(pixel, &pixel[getShift(4)]);
+	char check4 = checkDarkerOrBrighter(pixel, &pixel[getShift(12)]);
+	char result_check = check1 + check2 + check3 + check4;
+	if (result_check == 3 || result_check == -3)
+		return true;
+
+	return false;
 }
 
 void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::KeyPoint>& keypoints, cv::InputArray /*mask = cv::noArray()*/)
 {
     keypoints.clear();
     cv::Mat image = input.getMat();
-    int height = image.size().height;
-    int width = image.size().width;
+	if (width == 0)
+	{
+		end_j = image.size().height - 2;
+		width = image.size().width;
+		end_i = width - 2;
+		int_circle_pixels[0] = 0;
+	}
 
     uchar* img  = image.data;
 
-    long shift = 0;
-    for(long j = 3; j < height - 3; j++)
+    int shift = 0;
+    for(int j = 3; j < end_j; j++)
     {
-        for(long i = 3; i < width - 3; i++)
+        for(int i = 3; i < end_i; i++)
         {
             shift = j * width + i;
-            img[shift]
+			if (highSpeedTest(&img[shift]))
+			{
+				for (int circle_i = 1; circle_i < number_of_circle_pixels + 1; circle_i++)
+				{
+					circle_pixels[circle_i] = checkDarkerOrBrighter(&img[shift], &img[shift + getShift(circle_i - 1)]);
+					int_circle_pixels[circle_i] = int_circle_pixels[circle_i - 1] + circle_pixels[circle_i];
+				}
+				for (int circle_i = number_of_circle_pixels + 1; circle_i < number_of_circle_pixels + number_non_similar_pixels; circle_i++)
+				{
+					int_circle_pixels[circle_i] = int_circle_pixels[circle_i - 1] + circle_pixels[circle_i % number_of_circle_pixels];
+				}
+				for (int circle_i = 1; circle_i < number_of_circle_pixels; circle_i++)
+				{
+					char diff = int_circle_pixels[circle_i - 1 + number_non_similar_pixels] - int_circle_pixels[circle_i - 1];
+					if (diff == number_non_similar_pixels || diff == -number_non_similar_pixels)
+					{
+						keypoints.emplace_back(float(i), float(j), 1.0f);
+						break;
+					}
+				}
+			}
         }
     }
 }

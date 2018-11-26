@@ -99,12 +99,18 @@ public:
         return "FAST_Binary";
     }
 private:
-    int getShift(const int& index, const int& width);
-    char checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour);
-    bool highSpeedTest(const uchar* pixel, const int& width);
+    int getShift(const int& index) const;
+    char checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour) const;
+    bool highSpeedTest(const uchar* pixel) const;
 
-		static const int number_of_circle_pixels = 16;
-		uchar threshold = 20;
+	static const int number_of_circle_pixels = 16;
+	static const int number_non_similar_pixels = 12;
+	static const uchar threshold = 80;
+	char circle_pixels[number_of_circle_pixels + 1];
+	char int_circle_pixels[number_of_circle_pixels + number_non_similar_pixels];
+	int width = 0;
+	int end_j;
+	int end_i;
 };
 } // namespace cvlib
 
