@@ -13,6 +13,7 @@ namespace cvlib
 // static
 cv::Ptr<corner_detector_fast> corner_detector_fast::create()
 {
+  // create points for brief
     return cv::makePtr<corner_detector_fast>();
 }
 
@@ -118,23 +119,25 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
     }
 }
 
-void corner_detector_fast::compute(cv::InputArray, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors)
+/*
+ * @brief BRIEF Features
+ */
+void corner_detector_fast::compute(cv::InputArray input, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors)
 {
-    std::srand(unsigned(std::time(0))); // \todo remove me
-    // \todo implement any binary descriptor
-    const int desc_length = 2;
-    descriptors.create(static_cast<int>(keypoints.size()), desc_length, CV_32S);
-    auto desc_mat = descriptors.getMat();
-    desc_mat.setTo(0);
+  cv::Mat image = input.getMat();
+  // gaussian blur 9x9
 
-    int* ptr = reinterpret_cast<int*>(desc_mat.ptr());
-    for (const auto& pt : keypoints)
+    descriptors.create(static_cast<int>(keypoints.size()), desc_length, CV_32U);
+    cv::Mat desc_mat = descriptors.getMat();
+
+    unsigned int* desc_ptr = desc_mat.ptr<unsigned int>();
+
+    const int keypoints_num = keypoints.size();
+    int shift = 0;
+    for (int i = 0; i < keypoints_num; i++)
     {
-        for (int i = 0; i < desc_length; ++i)
-        {
-            *ptr = std::rand();
-            ++ptr;
-        }
+      shift = i * desc_length;
+
     }
 }
 

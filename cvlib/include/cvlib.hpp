@@ -102,7 +102,7 @@ private:
     int getShift(const int& index) const;
     char checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour) const;
     bool highSpeedTest(const uchar* pixel) const;
-
+	// detector
 	static const int number_of_circle_pixels = 16;
 	static const int number_non_similar_pixels = 9;
 	static const uchar threshold = 50;
@@ -111,6 +111,9 @@ private:
 	int width = 0;
 	int end_j;
 	int end_i;
+	// extractor
+	static const int desc_length = 8; // 32 * 8 = 256
+	cv::Point2f test_points[desc_length * 32];
 };
 } // namespace cvlib
 
