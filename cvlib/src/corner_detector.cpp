@@ -81,9 +81,9 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
     uchar* img  = image.data;
 
     int shift = 0;
-    for(int j = 3; j < end_j; j++)
+    for(int j = 3; j < end_j; j += 1)
     {
-        for(int i = 3; i < end_i; i++)
+        for(int i = 3; i < end_i; i += 1)
         {
             shift = j * width + i;
 			if (highSpeedTest(&img[shift]))
@@ -102,6 +102,13 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
 					char diff = int_circle_pixels[circle_i - 1 + number_non_similar_pixels] - int_circle_pixels[circle_i - 1];
 					if (diff == number_non_similar_pixels || diff == -number_non_similar_pixels)
 					{
+						if (!keypoints.empty())
+						{
+							cv::Point2f last_keypoint = keypoints.back().pt;
+							// easy non max suppresion
+							if (abs(last_keypoint.x - float(i)) + abs(last_keypoint.y - float(j)) < 5.0f)
+								break;
+						}
 						keypoints.emplace_back(float(i), float(j), 1.0f);
 						break;
 					}

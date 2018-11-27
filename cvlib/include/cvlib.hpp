@@ -104,8 +104,8 @@ private:
     bool highSpeedTest(const uchar* pixel) const;
 
 	static const int number_of_circle_pixels = 16;
-	static const int number_non_similar_pixels = 12;
-	static const uchar threshold = 80;
+	static const int number_non_similar_pixels = 9;
+	static const uchar threshold = 50;
 	char circle_pixels[number_of_circle_pixels + 1];
 	char int_circle_pixels[number_of_circle_pixels + number_non_similar_pixels];
 	int width = 0;

@@ -11,7 +11,8 @@
 
 int demo_feature_descriptor(int argc, char* argv[])
 {
-    cv::VideoCapture cap(0);
+    //cv::VideoCapture cap(0);
+	cv::VideoCapture cap("video (8).mp4");
     if (!cap.isOpened())
         return -1;
 
@@ -21,7 +22,8 @@ int demo_feature_descriptor(int argc, char* argv[])
     cv::namedWindow(main_wnd);
     cv::namedWindow(demo_wnd);
 
-    cv::Mat frame;
+    cv::Mat frame, frame_gray;
+	auto detector_Fast = cv::FastFeatureDetector::create();
     auto detector_a = cvlib::corner_detector_fast::create();
     auto detector_b = cv::KAZE::create();
     std::vector<cv::KeyPoint> corners;
@@ -33,12 +35,12 @@ int demo_feature_descriptor(int argc, char* argv[])
     {
         cap >> frame;
         cv::imshow(main_wnd, frame);
-
-        detector_b->detect(frame, corners); // \todo use your detector (detector_b)
+		cv::cvtColor(frame, frame_gray, cv::COLOR_BGR2GRAY);
+        detector_a->detect(frame_gray, corners);
         cv::drawKeypoints(frame, corners, frame, cv::Scalar(0, 0, 255));
 
         utils::put_fps_text(frame, fps);
-        // \todo add count of the detected corners at the top left corner of the image. Use green text color.
+		utils::put_number_of_keypoints(frame, corners.size());
         cv::imshow(demo_wnd, frame);
 
         pressed_key = cv::waitKey(30);
