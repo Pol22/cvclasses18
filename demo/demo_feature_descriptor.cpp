@@ -23,7 +23,6 @@ int demo_feature_descriptor(int argc, char* argv[])
     cv::namedWindow(demo_wnd);
 
     cv::Mat frame, frame_gray;
-	auto detector_Fast = cv::FastFeatureDetector::create();
     auto detector_a = cvlib::corner_detector_fast::create();
     auto detector_b = cv::KAZE::create();
     std::vector<cv::KeyPoint> corners;
@@ -48,7 +47,7 @@ int demo_feature_descriptor(int argc, char* argv[])
         {
             cv::FileStorage file("descriptor.json", cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
-            detector_a->compute(frame, corners, descriptors);
+            detector_a->compute(frame_gray, corners, descriptors);
             file << detector_a->getDefaultName() << descriptors;
 
             detector_b->compute(frame, corners, descriptors);
