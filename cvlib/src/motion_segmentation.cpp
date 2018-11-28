@@ -201,6 +201,10 @@ void motion_segmentation::apply(cv::InputArray input, cv::OutputArray fgmask, do
 	//number_of_frames++;
 	//if(alpha > 1.0 / 500)
 	//	alpha = 1.0 / number_of_frames;
+    cv::Mat element = 
+		getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5), cv::Point(2, 2));
+    cv::erode(output, output, element);
+    cv::dilate(output, output, element);
 	fgmask.assign(output);
 }
 } // namespace cvlib

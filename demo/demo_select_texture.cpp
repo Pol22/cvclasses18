@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 #include "../cvlib/src/select_texture.cpp"
 #include <cvlib.hpp>
+#include "utils.hpp"
 
 namespace
 {
@@ -43,8 +44,8 @@ void mouse(int event, int x, int y, int flags, void* param)
 
 int demo_select_texture(int argc, char* argv[])
 {
-	//cv::VideoCapture cap(0);
-	cv::VideoCapture cap("video (8).mp4");
+	cv::VideoCapture cap(0);
+	//cv::VideoCapture cap("video (8).mp4");
     if (!cap.isOpened())
         return -1;
 
@@ -61,6 +62,7 @@ int demo_select_texture(int argc, char* argv[])
     cv::setMouseCallback(data.wnd, mouse, &data);
 
     cv::Mat frame_gray;
+    utils::fps_counter fps;
     while (cv::waitKey(30) != 27) // ESC
     {
         cap >> data.image;
@@ -78,7 +80,7 @@ int demo_select_texture(int argc, char* argv[])
             cv::imshow(demo_wnd, segmented);
             cv::rectangle(data.image, data.tl, data.br, cv::Scalar(0, 0, 255));
         }
-		
+        utils::put_fps_text(data.image, fps);
         cv::imshow(data.wnd, data.image);
     }
 

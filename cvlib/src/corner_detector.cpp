@@ -103,11 +103,11 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
 					circle_pixels[circle_i] = checkDarkerOrBrighter(&img[shift], &img[shift + getShift(circle_i - 1)]);
 					int_circle_pixels[circle_i] = int_circle_pixels[circle_i - 1] + circle_pixels[circle_i];
 				}
-				for (int circle_i = number_of_circle_pixels + 1; circle_i < number_of_circle_pixels + number_non_similar_pixels; circle_i++)
+				for (int circle_i = number_of_circle_pixels + 1; circle_i < number_of_circle_pixels + number_non_similar_pixels + 1; circle_i++)
 				{
 					int_circle_pixels[circle_i] = int_circle_pixels[circle_i - 1] + circle_pixels[circle_i % number_of_circle_pixels];
 				}
-				for (int circle_i = 1; circle_i < number_of_circle_pixels; circle_i++)
+				for (int circle_i = 1; circle_i < number_of_circle_pixels + 1; circle_i++)
 				{
 					char diff = int_circle_pixels[circle_i - 1 + number_non_similar_pixels] - int_circle_pixels[circle_i - 1];
 					if (diff == number_non_similar_pixels || diff == -number_non_similar_pixels)
@@ -119,7 +119,8 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
 							if (abs(last_keypoint.x - float(i)) + abs(last_keypoint.y - float(j)) < 5.0f)
 								break;
 						}
-						keypoints.emplace_back(float(i), float(j), 1.0f, -1.0f, 0.0f, 0, 1);;
+						//keypoints.emplace_back(float(i), float(j), 1);;
+                        keypoints.emplace_back(cv::KeyPoint(i, j, 1));
 						break;
 					}
 				}

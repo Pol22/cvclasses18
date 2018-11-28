@@ -128,9 +128,9 @@ cv::Mat select_texture(const cv::Mat& image, const cv::Rect& roi, double eps, vo
 	int last_i = image.size().width - baseROI.width;
 	int last_j = image.size().height - baseROI.height;
 
-    for (int i = 0; i < last_i; i += 5)
+    for (int i = 0; i < last_i; i++)
     {
-        for (int j = 0; j < last_j; j += 5)
+        for (int j = 0; j < last_j; j++)
         {
             auto curROI = baseROI + cv::Point(i, j);
             calculateDescriptor(curROI, test, intConv, intSqConv);

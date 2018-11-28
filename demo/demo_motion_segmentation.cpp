@@ -9,12 +9,12 @@
 
 int demo_motion_segmentation(int argc, char* argv[])
 {
-	//cv::VideoCapture cap(0);
-	cv::VideoCapture cap("IMG_0243.MOV");
+	cv::VideoCapture cap(0);
+	//cv::VideoCapture cap("IMG_0243.MOV");
     if (!cap.isOpened())
         return -1;
 
-    //auto mseg = cv::createBackgroundSubtractorMOG2(); // \todo use cvlib::motion_segmentation
+    //auto mseg = cv::createBackgroundSubtractorMOG2();
 	auto mseg = cvlib::motion_segmentation();
     const auto main_wnd = "orig";
     const auto demo_wnd = "demo";
@@ -30,7 +30,7 @@ int demo_motion_segmentation(int argc, char* argv[])
     while (cv::waitKey(30) != 27) // ESC
     {
         cap >> frame;
-		cv::resize(frame, frame, cv::Size(), 1.0 / 4, 1.0 / 4);
+		//cv::resize(frame, frame, cv::Size(), 1.0 / 4, 1.0 / 4);
         cv::imshow(main_wnd, frame);
 		if (threshold != last_threshold && threshold != 0)
 		{
