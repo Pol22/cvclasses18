@@ -10,8 +10,8 @@
 
 int demo_split_and_merge(int argc, char* argv[])
 {
-    //cv::VideoCapture cap(0);
-	cv::VideoCapture cap("video (8).mp4");
+    cv::VideoCapture cap(0);
+	//cv::VideoCapture cap("video (8).mp4");
     if (!cap.isOpened())
         return -1;
 

@@ -11,8 +11,8 @@
 
 int demo_feature_descriptor(int argc, char* argv[])
 {
-    //cv::VideoCapture cap(0);
-	cv::VideoCapture cap("video (8).mp4");
+    cv::VideoCapture cap(0);
+	//cv::VideoCapture cap("video (8).mp4");
     if (!cap.isOpened())
         return -1;
 
@@ -23,9 +23,8 @@ int demo_feature_descriptor(int argc, char* argv[])
     cv::namedWindow(demo_wnd);
 
     cv::Mat frame, frame_gray;
-	auto detector_Fast = cv::FastFeatureDetector::create();
     auto detector_a = cvlib::corner_detector_fast::create();
-    auto detector_b = cv::KAZE::create();
+    auto detector_b = cv::ORB::create();
     std::vector<cv::KeyPoint> corners;
     cv::Mat descriptors;
 
@@ -49,11 +48,11 @@ int demo_feature_descriptor(int argc, char* argv[])
         {
             cv::FileStorage file("descriptor.json", cv::FileStorage::WRITE | cv::FileStorage::FORMAT_JSON);
 
-            detector_a->compute(frame, corners, descriptors);
+            detector_a->compute(frame_gray, corners, descriptors);
             file << detector_a->getDefaultName() << descriptors;
 
             detector_b->compute(frame, corners, descriptors);
-            file << "detector_b" << descriptors;
+            file << "ORB" << descriptors;
 
             std::cout << "Dump descriptors complete! \n";
         }

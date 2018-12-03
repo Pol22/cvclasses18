@@ -13,8 +13,17 @@ namespace cvlib
 // static
 cv::Ptr<corner_detector_fast> corner_detector_fast::create()
 {
-  // create points for brief
     return cv::makePtr<corner_detector_fast>();
+}
+
+corner_detector_fast::corner_detector_fast()
+{
+	double sigma = 1.0 / 25.0 * S * S;
+	for (int i = 0; i < all_length; i++)
+	{
+		test_points1[i] = cv::Point2f(rng.gaussian(sigma), rng.gaussian(sigma));
+		test_points2[i] = cv::Point2f(rng.gaussian(sigma), rng.gaussian(sigma));
+	}
 }
 
 int corner_detector_fast::getShift(const int& index) const
@@ -94,11 +103,11 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
 					circle_pixels[circle_i] = checkDarkerOrBrighter(&img[shift], &img[shift + getShift(circle_i - 1)]);
 					int_circle_pixels[circle_i] = int_circle_pixels[circle_i - 1] + circle_pixels[circle_i];
 				}
-				for (int circle_i = number_of_circle_pixels + 1; circle_i < number_of_circle_pixels + number_non_similar_pixels; circle_i++)
+				for (int circle_i = number_of_circle_pixels + 1; circle_i < number_of_circle_pixels + number_non_similar_pixels + 1; circle_i++)
 				{
 					int_circle_pixels[circle_i] = int_circle_pixels[circle_i - 1] + circle_pixels[circle_i % number_of_circle_pixels];
 				}
-				for (int circle_i = 1; circle_i < number_of_circle_pixels; circle_i++)
+				for (int circle_i = 1; circle_i < number_of_circle_pixels + 1; circle_i++)
 				{
 					char diff = int_circle_pixels[circle_i - 1 + number_non_similar_pixels] - int_circle_pixels[circle_i - 1];
 					if (diff == number_non_similar_pixels || diff == -number_non_similar_pixels)
@@ -110,7 +119,8 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
 							if (abs(last_keypoint.x - float(i)) + abs(last_keypoint.y - float(j)) < 5.0f)
 								break;
 						}
-						keypoints.emplace_back(float(i), float(j), 1.0f);
+						//keypoints.emplace_back(float(i), float(j), 1);;
+                        keypoints.emplace_back(cv::KeyPoint(i, j, 1));
 						break;
 					}
 				}
@@ -119,25 +129,49 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
     }
 }
 
+bool corner_detector_fast::pointOnImage(const cv::Mat& image, const cv::Point2f& point)
+{
+	if (point.x > 0.0 && point.x < image.rows && point.y > 0.0 && point.y < image.cols)
+		return true;
+	return false;
+}
+
+int corner_detector_fast::twoPointsTest(const cv::Mat& image, const cv::Point2f& point1, const cv::Point2f& point2, const int& num)
+{
+	if (pointOnImage(image, point1) && pointOnImage(image, point2) && image.at<uchar>(point1) < image.at<uchar>(point2))
+	{
+		return 1 << num;
+	}
+	return 0;
+}
+
+void corner_detector_fast::binaryTest(const cv::Mat& image, const cv::Point2f& keypoint, int* descriptor)
+{
+	for (int i = 0; i < all_length; i++)
+	{
+		descriptor[i / 32] += twoPointsTest(image, keypoint + test_points1[i], keypoint + test_points2[i], i % 32);
+	}
+}
+
 /*
  * @brief BRIEF Features
  */
 void corner_detector_fast::compute(cv::InputArray input, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors)
 {
-  cv::Mat image = input.getMat();
-  // gaussian blur 9x9
+	cv::Mat image;
+	cv::GaussianBlur(input.getMat(), image, cv::Size(9, 9), 2.0);
 
-    descriptors.create(static_cast<int>(keypoints.size()), desc_length, CV_32U);
+	descriptors.create(static_cast<int>(keypoints.size()), desc_length, CV_32S);
     cv::Mat desc_mat = descriptors.getMat();
 
-    unsigned int* desc_ptr = desc_mat.ptr<unsigned int>();
+    int* desc_ptr = desc_mat.ptr<int>();
 
     const int keypoints_num = keypoints.size();
     int shift = 0;
     for (int i = 0; i < keypoints_num; i++)
     {
-      shift = i * desc_length;
-
+		shift = i * desc_length;
+		binaryTest(image, keypoints[i].pt, &desc_ptr[shift]);
     }
 }
 

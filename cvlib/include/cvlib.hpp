@@ -80,6 +80,7 @@ private:
 class corner_detector_fast : public cv::Feature2D
 {
 public:
+	corner_detector_fast();
     /// \brief Fabrique method for creating FAST detector
     static cv::Ptr<corner_detector_fast> create();
 
@@ -102,18 +103,26 @@ private:
     int getShift(const int& index) const;
     char checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour) const;
     bool highSpeedTest(const uchar* pixel) const;
+
+	bool pointOnImage(const cv::Mat& image, const cv::Point2f& point);
+	int twoPointsTest(const cv::Mat& image, const cv::Point2f& point1, const cv::Point2f& point2, const int& num);
+	void binaryTest(const cv::Mat& image, const cv::Point2f& keypoint, int* descriptor);
 	// detector
 	static const int number_of_circle_pixels = 16;
 	static const int number_non_similar_pixels = 9;
-	static const uchar threshold = 50;
+	static const uchar threshold = 10;
 	char circle_pixels[number_of_circle_pixels + 1];
-	char int_circle_pixels[number_of_circle_pixels + number_non_similar_pixels];
+	char int_circle_pixels[number_of_circle_pixels + number_non_similar_pixels + 1];
 	int width = 0;
 	int end_j;
 	int end_i;
 	// extractor
+	static const int S = 15;
 	static const int desc_length = 8; // 32 * 8 = 256
-	cv::Point2f test_points[desc_length * 32];
+	static const int all_length = desc_length * 32; // 256
+	cv::Point2f test_points1[all_length];
+	cv::Point2f test_points2[all_length];
+	cv::RNG rng;
 };
 
 /// \brief Descriptor matched based on ratio of SSD
