@@ -13,18 +13,18 @@ namespace
 {
 void mouse(int event, int x, int y, int flags, void* param)
 {
-    user_data& data = *reinterpret_cast<user_data*>(param);
-	
-    if (event == CV_EVENT_LBUTTONDOWN)
-    {
-        data.tl = {x, y};
-    }
-    else if (event == CV_EVENT_RBUTTONDOWN)
-    {
-        data.br = {x, y};
-    }
+  user_data& data = *reinterpret_cast<user_data*>(param);
 
-	if (event == CV_EVENT_RBUTTONDOWN || event == CV_EVENT_LBUTTONDOWN)
+  if (event == cv::EVENT_LBUTTONDOWN)
+  {
+      data.tl = {x, y};
+  }
+  else if (event == cv::EVENT_RBUTTONDOWN)
+  {
+      data.br = {x, y};
+  }
+
+	if (event == cv::EVENT_RBUTTONDOWN || event == cv::EVENT_LBUTTONDOWN)
 	{
 		// calc descriptor
 		const cv::Rect roi = { data.tl, data.br };

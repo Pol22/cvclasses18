@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <cvlib.hpp>
+#include <fstream>
 
 int project_markup(int argc, char* argv[])
 {
