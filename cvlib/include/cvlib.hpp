@@ -100,9 +100,9 @@ public:
         return "FAST_Binary";
     }
 private:
-    int getShift(const int& index) const;
-    char checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour) const;
-    bool highSpeedTest(const uchar* pixel) const;
+  int getShift(const int& index) const;
+  char checkDarkerOrBrighter(const uchar* pixel, const uchar* neighbour) const;
+  bool highSpeedTest(const uchar* pixel) const;
 
 	bool pointOnImage(const cv::Mat& image, const cv::Point2f& point);
 	int twoPointsTest(const cv::Mat& image, const cv::Point2f& point1, const cv::Point2f& point2, const int& num);
