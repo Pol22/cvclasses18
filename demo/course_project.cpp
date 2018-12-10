@@ -58,7 +58,7 @@ public:
 	ObjectEscort() = default;
 	bool insert(cv::Rect rect)
 	{
-		auto& nearest = objects.end();
+		auto nearest = objects.end();
 		double dist = max_delta;
 		for (auto obj = objects.begin(); obj != objects.end(); obj++)
 		{
@@ -158,7 +158,7 @@ int course_project(int argc, char* argv[])
 		erode(mask, mask, element1);
 		dilate(mask, mask, element2);
 
-		findContours(mask, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 		for (int i = 0; i < contours.size(); i++)
 		{
 			cv::approxPolyDP(cv::Mat(contours[i]), contour_poly, 3, true);

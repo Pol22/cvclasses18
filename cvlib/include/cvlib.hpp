@@ -110,7 +110,8 @@ private:
 	// detector
 	static const int number_of_circle_pixels = 16;
 	static const int number_non_similar_pixels = 9;
-	static const uchar threshold = 10;
+	static const uchar threshold = 30;
+	static const int roi_mask_size = 7;
 	char circle_pixels[number_of_circle_pixels + 1];
 	char int_circle_pixels[number_of_circle_pixels + number_non_similar_pixels + 1];
 	int width = 0;
