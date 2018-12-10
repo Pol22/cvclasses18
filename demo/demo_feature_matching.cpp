@@ -11,7 +11,8 @@
 
 int demo_feature_matching(int argc, char* argv[])
 {
-    cv::VideoCapture cap(0);
+    // cv::VideoCapture cap(0);
+    cv::VideoCapture cap("TestVideo.mp4");
     if (!cap.isOpened())
         return -1;
 

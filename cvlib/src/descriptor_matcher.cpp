@@ -14,16 +14,30 @@ void descriptor_matcher::knnMatchImpl(cv::InputArray queryDescriptors, std::vect
     if (trainDescCollection.empty())
         return;
 
-    auto q_desc = queryDescriptors.getMat();
-    auto& t_desc = trainDescCollection[0];
+    if (queryDescriptors.getMat().cols != trainDescCollection[0].cols)
+        return;
 
-    matches.resize(q_desc.rows);
+    int* q_desc = queryDescriptors.getMat().ptr<int>();
+    int* t_desc = trainDescCollection[0].ptr<int>();
 
-    cv::RNG rnd;
-    for (int i = 0; i < q_desc.rows; ++i)
+    const int desc_num = queryDescriptors.getMat().rows;
+    const int train_desc_num = trainDescCollection[0].rows;
+
+    matches.resize(desc_num);
+
+    std::vector<cv::DMatch> ind(train_desc_num); // create DMatch vector
+
+    static const int desc_length = queryDescriptors.getMat().cols;
+    int shift = 0;
+    int* cur_q_desc;
+    for (int i = 0; i < desc_num; ++i)
     {
         // \todo implement Ratio of SSD check.
-        matches[i].emplace_back(i, rnd.uniform(0, t_desc.rows), FLT_MAX);
+        // \todo matches[i].emplace_back(i, rnd.uniform(0, t_desc.rows), FLT_MAX);
+        shift = i * desc_length;
+        cur_q_desc = &q_desc[shift];
+
+
     }
 }
 

@@ -129,11 +129,10 @@ private:
 /// \brief Descriptor matched based on ratio of SSD
 class descriptor_matcher : public cv::DescriptorMatcher
 {
-    public:
+public:
     /// \brief ctor
-    descriptor_matcher(float ratio = 1.5) : ratio_(ratio)
-    {
-    }
+    descriptor_matcher(float ratio = 1.5) :
+        ratio_(ratio) {}
 
     /// \brief setup ratio threshold for SSD filtering
     void set_ratio(float r)
@@ -167,7 +166,7 @@ class descriptor_matcher : public cv::DescriptorMatcher
         return copy;
     }
 
-    private:
+private:
     float ratio_;
 };
 
