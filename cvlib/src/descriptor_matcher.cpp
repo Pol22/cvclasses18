@@ -37,6 +37,8 @@ void descriptor_matcher::knnMatchImpl(cv::InputArray queryDescriptors, std::vect
         shift = i * desc_length;
         cur_q_desc = &q_desc[shift];
 
+        matches[i] = ind;
+        
 
     }
 }
