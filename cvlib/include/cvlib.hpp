@@ -167,7 +167,10 @@ public:
     }
 
 private:
+    int hamming_distance(int* x1, int* x2);
+
     float ratio_;
+    int desc_length;
 };
 
 /// \brief Stitcher for merging images into big one

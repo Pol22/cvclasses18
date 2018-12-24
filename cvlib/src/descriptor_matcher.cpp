@@ -5,9 +5,31 @@
  */
 
 #include "cvlib.hpp"
+#include <cstdlib>
 
 namespace cvlib
 {
+
+int descriptor_matcher::hamming_distance(int* x1, int* x2)
+{
+    int result = 0;
+    int val = 0;
+
+
+    for (int i = 0; i < desc_length; i++)
+    {
+        val = *x1 ^ *x2;
+        while (val != 0)
+        {
+            result++;
+            val &= val - 1;
+        }
+        x1++;
+        x2++;
+    }
+    return result;
+}
+
 void descriptor_matcher::knnMatchImpl(cv::InputArray queryDescriptors, std::vector<std::vector<cv::DMatch>>& matches, int k /*unhandled*/,
                                       cv::InputArrayOfArrays masks /*unhandled*/, bool compactResult /*unhandled*/)
 {
@@ -23,27 +45,39 @@ void descriptor_matcher::knnMatchImpl(cv::InputArray queryDescriptors, std::vect
     const int desc_num = queryDescriptors.getMat().rows;
     const int train_desc_num = trainDescCollection[0].rows;
 
-    matches.resize(desc_num);
+    std::vector<cv::DMatch> temp(train_desc_num); // create DMatch vector
 
-    std::vector<cv::DMatch> ind(train_desc_num); // create DMatch vector
-
-    static const int desc_length = queryDescriptors.getMat().cols;
-    int shift = 0;
+    desc_length = queryDescriptors.getMat().cols;
+    int shift_q = 0;
+    int shift_t = 0;
     int* cur_q_desc;
+    int* cur_t_desc;
+    int distance = 0;
     for (int i = 0; i < desc_num; ++i)
     {
-        // \todo implement Ratio of SSD check.
-        // \todo matches[i].emplace_back(i, rnd.uniform(0, t_desc.rows), FLT_MAX);
-        shift = i * desc_length;
-        cur_q_desc = &q_desc[shift];
+        shift_q = i * desc_length;
+        cur_q_desc = &q_desc[shift_q];
 
-        matches[i] = ind;
-        
+        for (int j = 0; j < train_desc_num; ++j)
+        {
+            shift_t = j * desc_length;
+            cur_t_desc = &t_desc[shift_t];
+            distance = hamming_distance(cur_q_desc, cur_t_desc);
+            temp[j].distance = distance;
+            temp[j].queryIdx = i;
+            temp[j].trainIdx = j;
+        }
+        std::sort(temp.begin(), temp.end());
+
+        // Ratio of SSD check
+        if (temp[0].distance / temp[1].distance > ratio_)
+            matches.push_back(temp);
 
     }
+    printf("adsda");
 }
 
-void descriptor_matcher::radiusMatchImpl(cv::InputArray queryDescriptors, std::vector<std::vector<cv::DMatch>>& matches, float /*maxDistance*/,
+void descriptor_matcher::radiusMatchImpl(cv::InputArray queryDescriptors, std::vector<std::vector<cv::DMatch>>& matches, float maxDistance,
                                          cv::InputArrayOfArrays masks /*unhandled*/, bool compactResult /*unhandled*/)
 {
     // \todo implement matching with "maxDistance"

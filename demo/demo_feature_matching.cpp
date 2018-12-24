@@ -22,7 +22,8 @@ int demo_feature_matching(int argc, char* argv[])
     cv::namedWindow(main_wnd);
     cv::namedWindow(demo_wnd);
 
-    auto detector = cv::AKAZE::create(); // \todo use your detector from cvlib
+    //auto detector = cv::AKAZE::create(); // \todo use your detector from cvlib
+    auto detector = cvlib::corner_detector_fast::create();
     auto matcher = cvlib::descriptor_matcher(1.2f); //\todo add trackbar to demo_wnd to tune ratio value
 
     /// \brief helper struct for tidy code
@@ -39,20 +40,21 @@ int demo_feature_matching(int argc, char* argv[])
 
     cv::Mat main_frame;
     cv::Mat demo_frame;
+    cv::Mat gray;
     utils::fps_counter fps;
     int pressed_key = 0;
     while (pressed_key != 27) // ESC
     {
         cap >> test.img;
-
-        detector->detect(test.img, test.corners);
+        cv::cvtColor(test.img, gray, cv::COLOR_BGR2GRAY);
+        detector->detect(gray, test.corners);
         cv::drawKeypoints(test.img, test.corners, main_frame);
         cv::imshow(main_wnd, main_frame);
 
         pressed_key = cv::waitKey(30);
         if (pressed_key == ' ') // space
         {
-            ref.img = test.img.clone();
+            ref.img = gray.clone();
             detector->detectAndCompute(ref.img, cv::Mat(), ref.corners, ref.descriptors);
         }
 
