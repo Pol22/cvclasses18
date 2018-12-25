@@ -109,8 +109,8 @@ private:
 	void binaryTest(const cv::Mat& image, const cv::Point2f& keypoint, int* descriptor);
 	// detector
 	static const int number_of_circle_pixels = 16;
-	static const int number_non_similar_pixels = 9;
-	static const uchar threshold = 30;
+	static const int number_non_similar_pixels = 12;
+	static const uchar threshold = 50;
 	static const int roi_mask_size = 7;
 	char circle_pixels[number_of_circle_pixels + 1];
 	char int_circle_pixels[number_of_circle_pixels + number_non_similar_pixels + 1];
@@ -131,7 +131,7 @@ class descriptor_matcher : public cv::DescriptorMatcher
 {
 public:
     /// \brief ctor
-    descriptor_matcher(float ratio = 1.5) :
+    explicit descriptor_matcher(float ratio = 1.5) :
         ratio_(ratio) {}
 
     /// \brief setup ratio threshold for SSD filtering
@@ -142,15 +142,15 @@ public:
 
     protected:
     /// \see cv::DescriptorMatcher::knnMatchImpl
-    virtual void knnMatchImpl(cv::InputArray queryDescriptors, std::vector<std::vector<cv::DMatch>>& matches, int k,
+    void knnMatchImpl(cv::InputArray queryDescriptors, std::vector<std::vector<cv::DMatch>>& matches, int k,
                               cv::InputArrayOfArrays masks = cv::noArray(), bool compactResult = false) override;
 
     /// \see cv::DescriptorMatcher::radiusMatchImpl
-    virtual void radiusMatchImpl(cv::InputArray queryDescriptors, std::vector<std::vector<cv::DMatch>>& matches, float maxDistance,
+    void radiusMatchImpl(cv::InputArray queryDescriptors, std::vector<std::vector<cv::DMatch>>& matches, float maxDistance,
                                  cv::InputArrayOfArrays masks = cv::noArray(), bool compactResult = false) override;
 
     /// \see cv::DescriptorMatcher::isMaskSupported
-    virtual bool isMaskSupported() const override
+    bool isMaskSupported() const override
     {
         return false;
     }
@@ -170,13 +170,23 @@ private:
     int hamming_distance(int* x1, int* x2);
 
     float ratio_;
-    int desc_length;
+    int desc_length = 0;
 };
 
 /// \brief Stitcher for merging images into big one
 class Stitcher
 {
-    /// \todo design and implement
+public:
+    Stitcher() = default;
+    ~Stitcher() { detector.release(); }
+    void setReference(cv::Mat& img);
+    cv::Mat stitch(cv::Mat& img);
+
+private:
+    cv::Ptr<cvlib::corner_detector_fast> detector = cvlib::corner_detector_fast::create();
+    cv::Mat ref_img;
+    std::vector<cv::KeyPoint> ref_corners;
+    cv::Mat res_descriptors;
 };
 } // namespace cvlib
 
