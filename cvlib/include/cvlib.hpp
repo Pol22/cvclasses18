@@ -110,7 +110,7 @@ private:
 	// detector
 	static const int number_of_circle_pixels = 16;
 	static const int number_non_similar_pixels = 12;
-	static const uchar threshold = 50;
+	static const uchar threshold = 30;
 	static const int roi_mask_size = 7;
 	char circle_pixels[number_of_circle_pixels + 1];
 	char int_circle_pixels[number_of_circle_pixels + number_non_similar_pixels + 1];
@@ -156,7 +156,7 @@ public:
     }
 
     /// \see cv::DescriptorMatcher::isMaskSupported
-    virtual cv::Ptr<cv::DescriptorMatcher> clone(bool emptyTrainData = false) const override
+    cv::Ptr<cv::DescriptorMatcher> clone(bool emptyTrainData = false) const override
     {
         cv::Ptr<cv::DescriptorMatcher> copy = new descriptor_matcher(*this);
         if (emptyTrainData)
@@ -184,9 +184,11 @@ public:
 
 private:
     cv::Ptr<cvlib::corner_detector_fast> detector = cvlib::corner_detector_fast::create();
+    cvlib::descriptor_matcher matcher;
     cv::Mat ref_img;
-    std::vector<cv::KeyPoint> ref_corners;
-    cv::Mat res_descriptors;
+    std::vector<cv::KeyPoint> ref_keypoints;
+    cv::Mat ref_descriptors;
+    static constexpr float max_distance = 100.0f;
 };
 } // namespace cvlib
 
