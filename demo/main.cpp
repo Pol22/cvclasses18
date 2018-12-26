@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 
 int project_markup(int argc, char* argv[]); // markup_application
+int course_project(int argc, char* argv[]); // course project
 int demo_split_and_merge(int argc, char* argv[]); // lab 1
 int demo_select_texture(int argc, char* argv[]); // lab 2
 int demo_motion_segmentation(int argc, char* argv[]); // lab 3
@@ -15,6 +16,7 @@ int demo_feature_descriptor(int argc, char* argv[]); // lab 5
 int demo_feature_matching(int argc, char* argv[]); // lab 6
 int demo_image_stitching(int argc, char* argv[]); // lab 7
 
+
 int main(int argc, char* argv[])
 {
     cv::namedWindow("main");
@@ -22,7 +24,7 @@ int main(int argc, char* argv[])
 
     // clang-format off
     auto putText = [help, x = 30](const std::string& text) mutable {
-        cv::putText(help, text, cvPoint(30, x), cv::FONT_HERSHEY_PLAIN, 1, cvScalar(0, 255, 0), 1, CV_AA);
+        cv::putText(help, text, cv::Point(30, x), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
         x += 20;
     };
     // clang-format on
@@ -37,6 +39,7 @@ int main(int argc, char* argv[])
     putText("Press 7 for Lab 7 Demo (image stitching)");
     putText("--------------------------------------------");
     putText("Press M for markup video file (course project tool)");
+    putText("Press C for Course project");
 
     cv::imshow("main", help);
 
@@ -70,6 +73,10 @@ int main(int argc, char* argv[])
             case 'M':
             case 'm':
                 project_markup(argc, argv);
+                break;
+            case 'C':
+            case 'c':
+                course_project(argc, argv);
                 break;
             case 27: // ESC
                 return 0;

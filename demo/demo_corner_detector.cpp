@@ -11,8 +11,8 @@
 
 int demo_corner_detector(int argc, char* argv[])
 {
-    cv::VideoCapture cap(0);
-	//cv::VideoCapture cap("video (8).mp4");
+    // cv::VideoCapture cap(0);
+	  cv::VideoCapture cap("TestVideo.mp4");
     if (!cap.isOpened())
         return -1;
 
@@ -22,8 +22,8 @@ int demo_corner_detector(int argc, char* argv[])
     cv::namedWindow(main_wnd);
     cv::namedWindow(demo_wnd);
 
-	cv::Mat frame, frame_gray;
-	auto detector = cvlib::corner_detector_fast::create();
+	  cv::Mat frame, frame_gray;
+	  auto detector = cvlib::corner_detector_fast::create();
     std::vector<cv::KeyPoint> corners;
 
     utils::fps_counter fps;
@@ -31,14 +31,14 @@ int demo_corner_detector(int argc, char* argv[])
     {
         cap >> frame;
         cv::imshow(main_wnd, frame);
-		cv::cvtColor(frame, frame_gray, cv::COLOR_BGR2GRAY);
+		    cv::cvtColor(frame, frame_gray, cv::COLOR_BGR2GRAY);
         detector->detect(frame_gray, corners);
         cv::drawKeypoints(frame, corners, frame, cv::Scalar(0, 0, 255));
         utils::put_fps_text(frame, fps);
-		utils::put_number_of_keypoints(frame, corners.size());
+		    utils::put_number_of_keypoints(frame, corners.size());
         cv::imshow(demo_wnd, frame);
     }
-	detector->clear();
+	  detector->clear();
     cv::destroyWindow(main_wnd);
     cv::destroyWindow(demo_wnd);
 

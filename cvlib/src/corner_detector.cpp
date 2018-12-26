@@ -64,8 +64,8 @@ bool corner_detector_fast::highSpeedTest(const uchar* pixel) const
 {
 	char check1 = checkDarkerOrBrighter(pixel, &pixel[getShift(0)]);
 	char check2 = checkDarkerOrBrighter(pixel, &pixel[getShift(8)]);
-    if (check1 == 0 && check2 == 0)
-        return false;
+		if (check1 == 0 && check2 == 0)
+			return false;
 
 	char check3 = checkDarkerOrBrighter(pixel, &pixel[getShift(4)]);
 	char check4 = checkDarkerOrBrighter(pixel, &pixel[getShift(12)]);
@@ -80,15 +80,21 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
 {
     keypoints.clear();
     cv::Mat image = input.getMat();
+    cv::Mat feature_mask = cv::Mat::zeros(image.size(), CV_8U);
+
 	if (width == 0)
 	{
-		end_j = image.size().height - 2;
+		end_j = image.size().height - 3;
 		width = image.size().width;
-		end_i = width - 2;
+		end_i = width - 3;
 		int_circle_pixels[0] = 0;
 	}
 
     uchar* img  = image.data;
+	uchar* feature_mask_ptr = feature_mask.data;
+	cv::Rect roi_mask_rect;
+	cv::Point roi_mask_shift = cv::Point(roi_mask_size / 2, roi_mask_size / 2);
+	cv::Mat roi_mask;
 
     int shift = 0;
     for(int j = 3; j < end_j; j += 1)
@@ -103,29 +109,31 @@ void corner_detector_fast::detect(cv::InputArray input, CV_OUT std::vector<cv::K
 					circle_pixels[circle_i] = checkDarkerOrBrighter(&img[shift], &img[shift + getShift(circle_i - 1)]);
 					int_circle_pixels[circle_i] = int_circle_pixels[circle_i - 1] + circle_pixels[circle_i];
 				}
+
 				for (int circle_i = number_of_circle_pixels + 1; circle_i < number_of_circle_pixels + number_non_similar_pixels + 1; circle_i++)
 				{
 					int_circle_pixels[circle_i] = int_circle_pixels[circle_i - 1] + circle_pixels[circle_i % number_of_circle_pixels];
 				}
+
 				for (int circle_i = 1; circle_i < number_of_circle_pixels + 1; circle_i++)
 				{
 					char diff = int_circle_pixels[circle_i - 1 + number_non_similar_pixels] - int_circle_pixels[circle_i - 1];
 					if (diff == number_non_similar_pixels || diff == -number_non_similar_pixels)
 					{
-						if (!keypoints.empty())
+						if(feature_mask_ptr[shift] == 0)
 						{
-							cv::Point2f last_keypoint = keypoints.back().pt;
-							// easy non max suppresion
-							if (abs(last_keypoint.x - float(i)) + abs(last_keypoint.y - float(j)) < 5.0f)
-								break;
+							keypoints.emplace_back(cv::KeyPoint(i, j, 1));
+							roi_mask_rect = cv::Rect(i, j, roi_mask_size, roi_mask_size);
+							roi_mask_rect -= roi_mask_shift;
+							roi_mask = feature_mask(roi_mask_rect);
+							roi_mask = 1;
+							i += roi_mask_size / 2;
 						}
-						//keypoints.emplace_back(float(i), float(j), 1);;
-                        keypoints.emplace_back(cv::KeyPoint(i, j, 1));
 						break;
 					}
 				}
 			}
-        }
+		}
     }
 }
 
@@ -162,21 +170,22 @@ void corner_detector_fast::compute(cv::InputArray input, std::vector<cv::KeyPoin
 	cv::GaussianBlur(input.getMat(), image, cv::Size(9, 9), 2.0);
 
 	descriptors.create(static_cast<int>(keypoints.size()), desc_length, CV_32S);
-    cv::Mat desc_mat = descriptors.getMat();
+	cv::Mat desc_mat = descriptors.getMat();
 
-    int* desc_ptr = desc_mat.ptr<int>();
+	int* desc_ptr = desc_mat.ptr<int>();
 
-    const int keypoints_num = keypoints.size();
-    int shift = 0;
-    for (int i = 0; i < keypoints_num; i++)
-    {
+	const int keypoints_num = keypoints.size();
+	int shift = 0;
+	for (int i = 0; i < keypoints_num; i++)
+	{
 		shift = i * desc_length;
 		binaryTest(image, keypoints[i].pt, &desc_ptr[shift]);
-    }
+	}
 }
 
-void corner_detector_fast::detectAndCompute(cv::InputArray, cv::InputArray, std::vector<cv::KeyPoint>&, cv::OutputArray descriptors, bool /*= false*/)
+void corner_detector_fast::detectAndCompute(cv::InputArray input, cv::InputArray mask, std::vector<cv::KeyPoint>& keypoints, cv::OutputArray descriptors, bool /*= false*/)
 {
-    // \todo implement me
+	detect(input, keypoints, mask);
+	compute(input, keypoints, descriptors);
 }
 } // namespace cvlib
