@@ -41,12 +41,21 @@ cv::Mat Stitcher::stitch(cv::Mat& img)
         // Homography matrix
         cv::Mat H = cv::findHomography(obj, scene, cv::RANSAC);
 
-        if (!H.empty())
+        if (H.empty())
         {
-            // warpPerspective
+			return cv::Mat();
         }
-    }
+		else
+		{
+			cv::Mat result, perspective;
+			cv::warpPerspective(ref_img, perspective, H, cv::Size(img.cols, img.rows));
 
+			double transparency = 0.8;
+
+			result += (1 - transparency) * perspective + transparency * img;
+			return result;
+		}
+    }
 }
 
 } // namespace cvlib

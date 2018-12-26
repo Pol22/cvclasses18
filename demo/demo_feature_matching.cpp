@@ -23,8 +23,8 @@ int demo_feature_matching(int argc, char* argv[])
     cv::namedWindow(demo_wnd);
     int ratio = 12;
     int radius_threshold = 100;
-    cv::createTrackbar("ratio / 10", demo_wnd, &ratio, 100);
-    cv::createTrackbar("radius threshold", demo_wnd, &radius_threshold, 256);
+    cv::createTrackbar("ratio / 10", main_wnd, &ratio, 100);
+    cv::createTrackbar("radius threshold", main_wnd, &radius_threshold, 256);
 
 
     auto detector = cvlib::corner_detector_fast::create();

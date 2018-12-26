@@ -20,7 +20,6 @@ public:
 	cv::Point center;
 	double speed_x;
 	double speed_y;
-	int count;
 
 	Object(const cv::Rect& rect)
 	{
@@ -29,7 +28,6 @@ public:
 		center = cv::Point(rect.x + w / 2, rect.y + h / 2);
 		speed_x = 0.0;
 		speed_y = 0.0;
-		count = 0;
 	}
 
 	double distance_from_next(const cv::Rect& rect)
@@ -47,7 +45,6 @@ public:
 		speed_x = new_center.x - center.x;
 		speed_y = new_center.y - center.y;
 		center = new_center;
-		count++;
 	}
 };
 
@@ -55,62 +52,40 @@ public:
 class ObjectEscort
 {
 public:
-		ObjectEscort() = default;
-		bool insert(cv::Rect rect)
+	ObjectEscort() = default;
+	bool insert(cv::Rect rect, const double mid_width)
+	{
+		auto nearest = objects.end();
+		double dist = max_delta;
+		for (auto obj = objects.begin(); obj != objects.end(); obj++)
 		{
-				auto nearest = objects.end();
-				double dist = max_delta;
-				for (auto obj = objects.begin(); obj != objects.end(); obj++)
-				{
-						double distance_to_rect = obj->distance_from_next(rect);
-						if (distance_to_rect < dist)
-						{
-								nearest = obj;
-								dist = distance_to_rect;
-						}
-				}
-
-				if (nearest == objects.end())
-				{
-						objects.emplace_back(rect);
-						return false;
-				}
-
-				nearest->update(rect);
-				if (nearest->count <= -min_count / 2 && nearest->count >= min_count / 2)
-						return true;
-				else
-						return false;
+			double distance_to_rect = obj->distance_from_next(rect);
+			if (distance_to_rect < dist)
+			{
+				nearest = obj;
+				dist = distance_to_rect;
+			}
 		}
 
-	void charge()
-	{
-			for (auto obj = objects.begin(); obj != objects.end(); obj++)
-			{
-					obj->count--;
-			}
+		if (nearest == objects.end())
+		{
+			objects.emplace_back(rect);
+			return false;
+		}
+
+		cv::Point2f last_center = nearest->center;
+		nearest->update(rect);
+		if (nearest->center.x >= mid_width && last_center.x < mid_width)
+			return true;
+		else
+			return false;
 	}
 
-	void plot(cv::Mat& img)
-	{
-			cv::Rect rect;
-			for (const auto& obj: objects)
-			{
-					if (obj.count > -5)
-					{
-							rect.x = obj.center.x - obj.w / 2 + 2*obj.speed_x;
-							rect.y = obj.center.y - obj.h / 2 + 2*obj.speed_y;
-							rect.width = obj.w;
-							rect.height = obj.h;
-							cv::rectangle(img, rect, color, 2);
-					}
-			}
-	}
+
+
 private:
 	list<Object> objects;
-	const double max_delta = 10.0;
-	const int min_count = -20;
-	const cv::Scalar color = cv::Scalar(0, 255, 0);
+	const double max_delta = 20.0;
 };
 
 
@@ -160,10 +135,10 @@ int course_project(int argc, char* argv[])
 	cv::namedWindow(origin_wnd, 1);
 	
 	utils::fps_counter fps;
+	bool cross = false;
+	double mid_w = double(frame.cols) / 2;
 	while (true) // ESC
 	{
-		escort.charge();
-
 		cap >> frame;
 		if (frame.empty())
 			break;
@@ -180,14 +155,12 @@ int course_project(int argc, char* argv[])
 		{
 			cv::approxPolyDP(cv::Mat(contours[i]), contour_poly, 3, true);
 			boundingBox = cv::boundingRect(cv::Mat(contour_poly));
-			//if (boundingBox.height * boundingBox.width < 3000)
-			//	continue;
-			if (escort.insert(boundingBox))
-			{
-				//rectangle(frame, boundingBox, cv::Scalar(0, 255, 0), 2);
-			}
+			
+			rectangle(frame, boundingBox, cv::Scalar(0, 255, 0), 2);
+			cross = escort.insert(boundingBox, mid_w);
+			if (cross)
+				cout << "Cross!!!" << endl;
 		}
-		escort.plot(frame);
 
 		cv::line(frame, cv::Point(frame.cols / 2, 0), cv::Point(frame.cols / 2, frame.rows),
 			cv::Scalar(0, 0, 255), 2, 8);

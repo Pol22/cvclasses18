@@ -11,8 +11,9 @@
 
 int demo_feature_descriptor(int argc, char* argv[])
 {
-    cv::VideoCapture cap(0);
+    //cv::VideoCapture cap(0);
 	//cv::VideoCapture cap("video (8).mp4");
+	cv::VideoCapture cap("TestVideo.mp4");
     if (!cap.isOpened())
         return -1;
 
